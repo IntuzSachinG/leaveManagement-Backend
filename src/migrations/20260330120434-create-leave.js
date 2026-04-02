@@ -1,11 +1,9 @@
-// 
+//
 "use strict";
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-   
-
     await queryInterface.createTable("leaves", {
       id: {
         type: Sequelize.UUID,
@@ -51,8 +49,7 @@ module.exports = {
       deleted_at: Sequelize.DATE,
     });
   },
-
-  async down(queryInterface, Sequelize) {
+async down(queryInterface, Sequelize) {
     /**
      * Add reverting commands here.
      *

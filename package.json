@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node dist/server.js",
     "build": "tsc",
-    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/server.ts"
+     "dev": "ts-node-dev --respawn --transpile-only src/server.ts"
   },
   "keywords": [],
   "author": "",
@@ -13,10 +13,12 @@
   "description": "",
   "dependencies": {
     "bcryptjs": "^3.0.3",
+    "body-parser": "^2.2.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
+    "express-validator": "^7.3.1",
     "jsonwebtoken": "^9.0.3",
     "mysql2": "^3.20.0",
     "path": "^0.12.7",
@@ -25,6 +27,7 @@
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
+    "@types/body-parser": "^1.19.6",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",

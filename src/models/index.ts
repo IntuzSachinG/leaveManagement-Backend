@@ -23,4 +23,14 @@ Leave.belongsTo(Employee, {
   as: "employee",
 });
 
+Employee.hasMany(Leave, {
+  foreignKey: "approvedBy",
+  as: "approvedLeaves",
+});
+
+Leave.belongsTo(Employee, {
+  foreignKey: "approvedBy",
+  as: "approver",
+});
+
 export { Department, Employee, Leave, sequelize };

@@ -1,4 +1,5 @@
 import { Optional } from "sequelize";
+import { Role } from "../types/express.types";
 
 export interface EmployeeAttributes {
   id: string;
@@ -9,7 +10,8 @@ export interface EmployeeAttributes {
   password: string;
   gender?: "male" | "female" | "other";
   status?: "active" | "inactive";
-  role?: "manager" | "admin" | "employee";
+  // role?: "manager" | "admin" | "employee";
+  role:Role;
   created_at?: Date;
   updated_at?: Date;
   deleted_at?: Date | null;

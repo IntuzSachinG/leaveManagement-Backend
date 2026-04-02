@@ -4,6 +4,7 @@ import {
   LeaveAttributes,
   LeaveCreationAttributes,
 } from "../interface/leaveInterface";
+import { Employee } from "./employee";
 
 export class Leave
   extends Model<LeaveAttributes, LeaveCreationAttributes>
@@ -18,6 +19,8 @@ export class Leave
   public reason!: string;
   public status!: "pending" | "approved" | "rejected" | "cancelled";
   public approvedBy!: string;
+    public employee?: Employee;
+  public approver?: Employee;
   public readonly created_at!: Date;
   public readonly updated_at!: Date;
   public readonly deleted_at!: Date | null;

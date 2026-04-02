@@ -4,6 +4,7 @@ import {
   EmployeeAttributes,
   EmployeeCreationAttributes,
 } from "../interface/employeeInterface";
+import { Role } from "../types/express.types";
 
 export class Employee
   extends Model<EmployeeAttributes, EmployeeCreationAttributes>
@@ -17,7 +18,8 @@ export class Employee
   public password!: string;
   public gender?: "male" | "female" | "other";
   public status?: "active" | "inactive";
-  public role?: "manager" | "admin" | "employee";
+  // public role?: "manager" | "admin" | "employee";
+    public role!: Role;
   public readonly created_at!: Date;
   public readonly updated_at!: Date;
   public readonly deleted_at!: Date | null;

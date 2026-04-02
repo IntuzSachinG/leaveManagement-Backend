@@ -1,17 +1,18 @@
 import express from "express";
-import cors from "cors";
 import cookieParser from "cookie-parser";
-import dotenv from "dotenv";
+import routes from "./routes";
+import { globalErrorHandler } from "./middlewares/errorMiddleware";
+import { notFoundHandler } from "./middlewares/notfoundMiddleware";
+// import { errorMiddleware } from "./middlewares/errorMiddleware";
 
-dotenv.config();
 const app = express();
 
+app.use(express.json());
 app.use(cookieParser());
 
-app.use(cors());
-app.use(express.json());
+app.use("/api", routes);
 
-// app.use(bodyParser.json());
-// app.use(bodyParser.urlencoded({ extended: true }));
-
+// app.use(errorMiddleware);
+app.use(globalErrorHandler)
+app.use(notFoundHandler);
 export default app;

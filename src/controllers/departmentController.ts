@@ -36,3 +36,40 @@ export const getDepartments = async (
     next(err);
   }
 };
+
+export const updateDepartment = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const id = req.params.id as string;
+    const department = await departmentService.updateDepartment(id, req.body);
+
+    res.status(200).json({
+      success: true,
+      message: "Department updated successfully",
+      data: department,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteDepartment = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const id = req.params.id as string;
+    await departmentService.deleteDepartment(id);
+
+    res.status(200).json({
+      success: true,
+      message: "Department deleted successfully",
+    });
+  } catch (err) {
+    next(err);
+  }
+};

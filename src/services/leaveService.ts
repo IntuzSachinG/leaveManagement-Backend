@@ -1,4 +1,4 @@
-import { Op, WhereOptions } from "sequelize";
+import { FindOptions, Op, WhereOptions } from "sequelize";
 import { Leave, Employee } from "../models";
 import { sequelize } from "../config/database";
 
@@ -158,20 +158,9 @@ interface LeaveQuery {
   employeeId?: string;
 }
 
-export const getLeaveHistory = async (query: LeaveQuery, user: AuthUser) => {
-  const {
-    page = "1",
-    limit = "10",
-    status,
-    startDate,
-    endDate,
-    employeeId,
-  } = query;
+const ACTIVE_LEAVE_STATUSES = ["pending", "approved"] as const;
 
-  const pageNum = Number(page);
-  const limitNum = Number(limit);
-  const offset = (pageNum - 1) * limitNum;
-
+function buildLeaveScope(user: AuthUser) {
   const where: WhereOptions = {};
 
   if (user.role === "employee") {
@@ -182,34 +171,58 @@ export const getLeaveHistory = async (query: LeaveQuery, user: AuthUser) => {
     where["$employee.departmentId$"] = user.departmentId;
   }
 
-  if (status) {
-    where["status"] = status;
+  return where;
+}
+
+function buildHistoryFilters(query: LeaveQuery, user: AuthUser) {
+  const where: WhereOptions = {
+    ...buildLeaveScope(user),
+  };
+
+  if (query.status) {
+    where["status"] = query.status;
   }
 
-  if (employeeId) {
-    where["employeeId"] = employeeId;
+  if (query.employeeId) {
+    where["employeeId"] = query.employeeId;
   }
 
-  if (startDate && endDate) {
+  if (query.startDate && query.endDate) {
     where["startDate"] = {
-      [Op.between]: [new Date(startDate), new Date(endDate)],
+      [Op.between]: [new Date(query.startDate), new Date(query.endDate)],
     };
   }
 
+  return where;
+}
+
+function buildLeaveInclude(): FindOptions["include"] {
+  return [
+    {
+      model: Employee,
+      as: "employee",
+      attributes: ["id", "name", "email", "departmentId"],
+    },
+    {
+      model: Employee,
+      as: "approver",
+      attributes: ["id", "name", "email"],
+    },
+  ];
+}
+
+export const getLeaveHistory = async (query: LeaveQuery, user: AuthUser) => {
+  const { page = "1", limit = "10" } = query;
+
+  const pageNum = Math.max(Number(page) || 1, 1);
+  const limitNum = Math.max(Number(limit) || 10, 1);
+  const offset = (pageNum - 1) * limitNum;
+
+  const where = buildHistoryFilters(query, user);
+
   const { rows, count } = await Leave.findAndCountAll({
     where,
-    include: [
-      {
-        model: Employee,
-        as: "employee",
-        attributes: ["id", "name", "email", "departmentId"],
-      },
-      {
-        model: Employee,
-        as: "approver",
-        attributes: ["id", "name", "email"],
-      },
-    ],
+    include: buildLeaveInclude(),
     limit: limitNum,
     offset,
     order: [["created_at", "DESC"]],
@@ -220,5 +233,40 @@ export const getLeaveHistory = async (query: LeaveQuery, user: AuthUser) => {
     total: count,
     page: pageNum,
     totalPages: Math.ceil(count / limitNum),
+  };
+};
+
+export const getLeaveSummary = async (user: AuthUser) => {
+  const where = buildLeaveScope(user);
+  const include = buildLeaveInclude();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const [total, pending, approved, rejected, cancelled, activeToday] =
+    await Promise.all([
+      Leave.count({ where, include }),
+      Leave.count({ where: { ...where, status: "pending" }, include }),
+      Leave.count({ where: { ...where, status: "approved" }, include }),
+      Leave.count({ where: { ...where, status: "rejected" }, include }),
+      Leave.count({ where: { ...where, status: "cancelled" }, include }),
+      Leave.count({
+        where: {
+          ...where,
+          status: { [Op.in]: ACTIVE_LEAVE_STATUSES },
+          startDate: { [Op.lte]: today },
+          endDate: { [Op.gte]: today },
+        },
+        include,
+      }),
+    ]);
+
+  return {
+    total,
+    pending,
+    approved,
+    rejected,
+    cancelled,
+    activeToday,
+    lastUpdated: new Date().toISOString(),
   };
 };

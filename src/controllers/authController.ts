@@ -6,6 +6,47 @@ import { Employee } from "../models";
 import { generateToken } from "../utils/jwt";
 import { AppError } from "../utils/AppError";
 
+export const register = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { name, email, password, gender, mobile, departmentId } = req.body;
+
+    const existing = await Employee.findOne({ where: { email } });
+
+    if (existing) return next(new AppError("Email already exists", 400));
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await Employee.create({
+      name,
+      email,
+      password: hashedPassword,
+      gender,
+      mobile,
+      departmentId,
+      role: "employee",
+      status: "active",
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Signup successfully",
+      data: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        departmentId: user.departmentId,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const login = async (
   req: Request,
   res: Response,
@@ -45,6 +86,27 @@ export const login = async (
         departmentId: user.departmentId,
       },
       token,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const logout = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Logout successfully",
     });
   } catch (err) {
     next(err);

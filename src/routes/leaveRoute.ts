@@ -15,6 +15,8 @@ router.post(
   controller.applyLeave,
 );
 
+router.get("/summary", authMiddleware, controller.getLeaveSummary);
+
 router.get("/", authMiddleware, controller.getLeaveHistory);
 
 router.patch(

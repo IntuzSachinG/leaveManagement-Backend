@@ -3,7 +3,10 @@ import { Router } from "express";
 import * as controller from "../controllers/employeeController";
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { allowRoles } from "../middlewares/roleMiddleware";
-import { createEmployeeValidator } from "../validators/employeeValidator";
+import {
+  createEmployeeValidator,
+  updateEmployeeValidator,
+} from "../validators/employeeValidator";
 import { validate } from "../middlewares/validationMiddleware";
 
 
@@ -19,5 +22,25 @@ router.post(
 );
 
 router.get("/admin-get-employees", authMiddleware, allowRoles("admin"), controller.getEmployees);
+router.get(
+  "/visible-employee",
+  authMiddleware,
+  allowRoles("admin", "manager"),
+  controller.getVisibleEmployees,
+);
+router.put(
+  "/:id/admin-update-employee",
+  authMiddleware,
+  allowRoles("admin"),
+  updateEmployeeValidator,
+  validate,
+  controller.updateEmployee,
+);
+router.delete(
+  "/:id/admin-delete-employee",
+  authMiddleware,
+  allowRoles("admin"),
+  controller.deleteEmployee,
+);
 
 export default router;

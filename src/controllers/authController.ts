@@ -1,8 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcryptjs";
 import { Employee } from "../models";
-
-// import { AppError } from "../middlewares/errorMiddleware";
+import { AuthRequest } from "../types/express.types";
 import { generateToken } from "../utils/jwt";
 import { AppError } from "../utils/AppError";
 
@@ -107,6 +106,34 @@ export const logout = async (
     res.status(200).json({
       success: true,
       message: "Logout successfully",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const me = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const authReq = req as AuthRequest;
+
+    const user = await Employee.findByPk(authReq.user.id, {
+      attributes: ["id", "name", "email", "role", "departmentId"],
+    });
+
+    if (!user) {
+      return next(new AppError("User not found", 404));
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Current user fetched successfully",
+      data: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        departmentId: user.departmentId,
+      },
     });
   } catch (err) {
     next(err);

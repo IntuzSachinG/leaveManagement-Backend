@@ -8,7 +8,6 @@ export const createDepartment = async (
 ) => {
   try {
     const department = await departmentService.createDepartment(req.body);
-    // res.status(201).json(department);
     res.status(201).json({
       success: true,
       message: "Department created successfully",
@@ -26,7 +25,6 @@ export const getDepartments = async (
 ) => {
   try {
     const departments = await departmentService.getDepartments();
-    // res.json(departments);
     res.status(200).json({
       success: true,
       message: "Department fetched successfully",

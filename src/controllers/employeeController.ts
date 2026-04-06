@@ -5,41 +5,17 @@ import { EmployeeCreationAttributes } from "../interface/employeeInterface";
 import { AuthRequest } from "../types/express.types";
 import { Employee } from "../models";
 import { AppError } from "../utils/AppError";
-// import { AppError } from "../middlewares/errorMiddleware";
 
-// export const createEmployee = async (
-//   req: Request,
-//   res: Response,
-//   next: NextFunction,
-// ) => {
-//   const authReq = req as AuthRequest;
-//   try {
-//     const data: EmployeeCreationAttributes = authReq.body;
-
-//     const employee = await service.createEmployee(data);
-//     res.status(201).json(employee);
-//   } catch (err) {
-//     next(err);
-//   }
-// };
-
-export const createEmployee = async (
+async function createEmployeeFromRequest(
   req: Request,
   res: Response,
   next: NextFunction,
-) => {
+  mode: "admin" | "manager",
+) {
   try {
+    const authReq = req as AuthRequest;
     const { name, email, password, role, gender, mobile, departmentId } =
       req.body;
-
-    // const existing = await User.findOne({ where: { email } });
-
-    // if (existing) {
-    //   return res.status(400).json({
-    //     success: false,
-    //     message: "Email already exists",
-    //   });
-    // }
 
     const existing = await Employee.findOne({
       where: { email },
@@ -50,26 +26,41 @@ export const createEmployee = async (
     }
 
     const hashed = await bcrypt.hash(password, 10);
+    const nextRole = mode === "manager" ? "employee" : role;
+    const nextDepartmentId =
+      mode === "manager" ? authReq.user.departmentId : departmentId;
+
+    if (mode === "manager" && role !== "employee") {
+      throw new AppError("Managers can only create employees", 403);
+    }
+
+    if (
+      mode === "manager" &&
+      departmentId &&
+      departmentId !== authReq.user.departmentId
+    ) {
+      throw new AppError(
+        "Managers can only create employees in their own department",
+        403,
+      );
+    }
 
     const employee = await Employee.create({
       name,
       email,
       password: hashed,
-      role,
+      role: nextRole,
       gender,
       mobile,
-      departmentId,
+      departmentId: nextDepartmentId,
     });
-
-    // const token = generateToken({ id: user.id, role: user.role });
 
     res.status(201).json({
       success: true,
       message: "Employee registered successfully",
-
-      // data: [employee]
       data: [
         {
+          id: employee.id,
           name: employee.name,
           email: employee.email,
           role: employee.role,
@@ -78,34 +69,26 @@ export const createEmployee = async (
           departmentId: employee.departmentId,
         },
       ],
-      // data:{
-      //   ...employee,attributes:{exclude:["password"]}
-      // }
     });
-    // } catch (error: unknown) {
-    //   console.error("Register Error:", error);
-
-    //   return res.status(500).json({
-    //     success: false,
-    //     message: "Internal server error",
-    //   });
-    // }
-    // } //   } catch (err) {
-    //     next(err);
-    //   }
-    // };
   } catch (err) {
     next(err);
   }
-  // } catch (error) {
-  //         if (error.name === 'SequelizeUniqueConstraintError') {
-  //             res.status(403)
-  //             res.send({ status: 'error', message: "User already exists"});
-  //         } else {
-  //             res.status(500)
-  //             res.send({ status: 'error', message: "Something went wrong"});
-  //         }
-  //     }
+}
+
+export const createEmployee = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  return createEmployeeFromRequest(req, res, next, "admin");
+};
+
+export const createEmployeeForManager = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  return createEmployeeFromRequest(req, res, next, "manager");
 };
 
 export const getEmployees = async (
@@ -116,7 +99,6 @@ export const getEmployees = async (
   const authReq = req as AuthRequest;
   try {
     const employees = await service.getEmployees();
-    // res.json(employees);
     return res.status(200).json({
       success: true,
       message: "Employees fetched Successfully",

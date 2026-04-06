@@ -8,7 +8,7 @@ import { validate } from "../middlewares/validationMiddleware";
 const router = Router();
 
 router.post(
-  "/",
+  "/apply-leaves",
   authMiddleware,
   applyLeaveValidator,
   validate,
@@ -17,22 +17,22 @@ router.post(
 
 router.get("/summary", authMiddleware, controller.getLeaveSummary);
 
-router.get("/", authMiddleware, controller.getLeaveHistory);
+router.get("/get-leaves", authMiddleware, controller.getLeaveHistory);
 
 router.patch(
-  "/:id/approve",
+  "/:id/approve-leaves",
   authMiddleware,
   allowRoles("admin", "manager"),
   controller.approveLeave,
 );
 
 router.patch(
-  "/:id/reject",
+  "/:id/reject-leaves",
   authMiddleware,
   allowRoles("admin", "manager"),
   controller.rejectLeave,
 );
 
-router.patch("/:id/cancel", authMiddleware, controller.cancelLeave);
+router.patch("/:id/cancel-leaves", authMiddleware, controller.cancelLeave);
 
 export default router;

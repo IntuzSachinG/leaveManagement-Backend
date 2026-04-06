@@ -1,4 +1,3 @@
-
 import { Router } from "express";
 import * as controller from "../controllers/departmentController";
 
@@ -25,7 +24,7 @@ router.post(
 
 router.get("/get-departments", authMiddleware, controller.getDepartments);
 router.put(
-  "/:id",
+  "/:id/admin-update-department",
   authMiddleware,
   allowRoles("admin"),
   updateDepartmentValidator,
@@ -33,7 +32,7 @@ router.put(
   controller.updateDepartment,
 );
 router.delete(
-  "/:id",
+  "/:id/admin-delete-department",
   authMiddleware,
   allowRoles("admin"),
   controller.deleteDepartment,

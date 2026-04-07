@@ -3,7 +3,7 @@ import { body } from "express-validator";
 export const createEmployeeValidator = [
   body("name").isString().withMessage("Name Bust Be String Only...").notEmpty(),
   body("email").isEmail(),
-  body("password").isLength({ min: 6 }),
+  body("password").isLength({ min: 6 }).withMessage("Password must be at least 6 characters"),
   body("role").isIn(["admin", "manager", "employee"]),
   body("departmentId").notEmpty(),
   body("mobile")

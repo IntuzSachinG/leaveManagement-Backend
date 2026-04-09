@@ -7,11 +7,19 @@ import { notFoundHandler } from "./middlewares/notfoundMiddleware";
 // import { errorMiddleware } from "./middlewares/errorMiddleware";
 
 const app = express();
-const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+// const frontendUrl = process.env.FRONTEND_URL || "http://192.168.10.180:3000";
+
+// app.use(
+//   cors({
+//     origin: frontendUrl,
+//     credentials: true,
+//   }),
+// );
 
 app.use(
   cors({
-    origin: frontendUrl,
+    origin: true,
+    
     credentials: true,
   }),
 );

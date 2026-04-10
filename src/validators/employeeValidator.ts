@@ -23,7 +23,7 @@ export const updateEmployeeValidator = [
   body("departmentId").optional().notEmpty(),
   body("mobile")
     .optional({ nullable: true, checkFalsy: true })
-    .matches(/^\+?[1-9]\d{1,14}$/)
+    .matches(/^\+?[1-9]\d{9,14}$/)
     .withMessage("Invalid mobile number format"),
   body("gender")
     .optional()

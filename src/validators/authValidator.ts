@@ -9,7 +9,7 @@ export const registerValidator = [
   body("departmentId").notEmpty().withMessage("Department is required"),
   body("mobile")
     .optional({ nullable: true, checkFalsy: true })
-    .matches(/^\+?[1-9]\d{1,14}$/)
+    .matches(/^\+?[1-9]\d{9,14}$/)
     .withMessage("Invalid mobile number format"),
   body("gender")
     .isIn(["male", "female", "other"])

@@ -56,7 +56,7 @@ Employee.init(
         isValidMobile(value: string | null) {
           if (!value) return;
 
-          const match = /^\+?[1-9]\d{1,14}$/;
+          const match = /^\+?[1-9]\d{9,14}$/;
           if (!match.test(value)) {
             throw new Error("Invalid mobile number format");
           }

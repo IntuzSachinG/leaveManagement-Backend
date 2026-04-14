@@ -5,6 +5,48 @@ import { AuthRequest } from "../types/express.types";
 import { generateToken } from "../utils/jwt";
 import { AppError } from "../utils/AppError";
 
+// export const register = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction,
+// ) => {
+//   try {
+//     const { name, email, password, gender, mobile, departmentId } = req.body;
+
+//     const existing = await Employee.findOne({ where: { email } });
+
+//     if (existing) return next(new AppError("Email already exists", 400));
+
+//     const hashedPassword = await bcrypt.hash(password, 10);
+
+//     const user = await Employee.create({
+//       name,
+//       email,
+//       password: hashedPassword,
+//       gender,
+//       mobile,
+//       departmentId,
+//       role: "employee",
+//       status: "active",
+//     });
+
+//     res.status(201).json({
+//       success: true,
+//       message: "Signup successfully",
+//       data: {
+//         id: user.id,
+//         name: user.name,
+//         email: user.email,
+//         role: user.role,
+//         departmentId: user.departmentId,
+//       },
+//     });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+
+
 export const register = async (
   req: Request,
   res: Response,
@@ -30,6 +72,21 @@ export const register = async (
       status: "active",
     });
 
+   
+    const token = generateToken({
+      id: user.id,
+      role: user.role,
+      departmentId: user.departmentId,
+    });
+
+   
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
     res.status(201).json({
       success: true,
       message: "Signup successfully",
@@ -39,12 +96,13 @@ export const register = async (
         email: user.email,
         role: user.role,
         departmentId: user.departmentId,
-      },
+      }
     });
   } catch (err) {
     next(err);
   }
 };
+
 
 export const login = async (
   req: Request,
